@@ -1,0 +1,17 @@
+# Dependencias directas con versión fija: cualquier clon instala lo mismo.
+# Probado con Python 3.12 en Windows 11.
+
+# dbt: transformaciones staging -> marts sobre PostgreSQL.
+# dbt-core se fija aparte porque dbt-postgres pide "dbt-core>=1.8.0rc1": por ese
+# "rc", pip acepta versiones preliminares y sin este pin instala una beta.
+dbt-core==1.12.6
+dbt-postgres==1.11.0
+
+# Ingesta: descarga de archivos y carga al esquema raw.
+requests==2.34.2
+# Es el mismo driver que usa dbt-postgres: un solo driver en todo el proyecto.
+psycopg2-binary==2.9.13
+
+# Perfilado de archivos crudos (skill perfilar-dataset); openpyxl lee los .xlsx.
+pandas==3.1.0
+openpyxl==3.1.5
