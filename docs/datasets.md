@@ -23,8 +23,10 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
 ## Contratos
 
 - **Fuente y URL:** Portal de Datos Abiertos del OECE (CONOSCE),
-  <https://bi.seace.gob.pe/pentaho/api/repos/:public:portal:datosabiertos.html/content?userid=public&password=key>.
-  El enlace exacto de descarga del archivo está por verificar.
+  <https://bi.seace.gob.pe/pentaho/api/repos/:public:portal:datosabiertos.html/content?userid=public&password=key>,
+  página "Contratos" (portal actualizado al 30 de setiembre de 2026).
+  Descarga:
+  <https://conosce.osce.gob.pe/buscador/assets/67ae6c4a/reportes/contratos/2024/CONOSCE_CONTRATOS2024_0.xlsx>
 - **Archivo y fecha de descarga:** `CONOSCE_CONTRATOS2024_0.xlsx`, 2026-10-26.
   2.4 MB, 24 columnas.
 - **Grano (1 fila = …):** **contrato × ítem × registro de modificación.** Hay
@@ -113,27 +115,31 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
      etiquetas entre sus ítems; normalizando a PEN quedan con una sola
      moneda.
 - **Por verificar:**
-  - Qué define el año del archivo (¿año de la convocatoria?) y si para
-    completar las suscripciones de 2024 hacen falta los archivos de 2023 y
-    2025.
-  - Si existen más partes (`CONOSCE_CONTRATOS2024_1.xlsx`, …). El sufijo `_0`
-    lo sugiere. 7,477 contratos en un año puede estar incompleto.
+  - Qué define el año del archivo y si para completar las suscripciones de
+    2024 hacen falta los archivos de 2023 y 2025. El portal dice que "entre
+    la adjudicación y la suscripción del contrato transcurre un tiempo", lo
+    que apunta al año de la convocatoria o de la adjudicación.
+  - Si 7,477 contratos son todos los de 2024. **No hay más partes
+    publicadas:** el portal enlaza un solo archivo por año (`_0`), de 2018 a
+    2026. No se comprobó si el servidor guarda partes sin enlazar.
   - Si un mismo contrato aparece en archivos de años distintos. Hace falta
     otro año para comprobarlo.
   - Qué son los identificadores `L0…`.
   - Qué mide exactamente `MONTO_ADICIONAL`. En la primera fila de 5,150
     contratos (69%) vale más de 0, lo que parece demasiado para adicionales
     en sentido legal.
-  - Si `CODIGOCONVOCATORIA` permite unir con otro dataset del OECE que
-    traiga el tipo de procedimiento y el objeto contractual.
+  - Si `CODIGOCONVOCATORIA` permite unir con "Datos de la Convocatoria" o
+    "Datos de la Adjudicación", y si esos archivos traen el tipo de
+    procedimiento y el objeto contractual. Ver "Revisión del portal".
   - Licencia de uso del portal.
 
 ---
 
 ## Proveedores
 
-- **Fuente y URL:** Portal de Datos Abiertos del OECE (CONOSCE), misma URL
-  que Contratos. El enlace exacto de descarga está por verificar.
+- **Fuente y URL:** Portal de Datos Abiertos del OECE (CONOSCE), página
+  "Proveedores y Consorcios", botón "Individual". Descarga:
+  <https://conosce.osce.gob.pe/buscador/assets/67ae6c4a/reportes/proveedores/2024/CONOSCE_PROVEEDORES2024_0.xlsx>
 - **Archivo y fecha de descarga:** `CONOSCE_PROVEEDORES2024_0.xlsx`,
   2026-10-26. 2.3 MB, 9 columnas.
 - **Grano (1 fila = …):** proveedor × tipo de registro en el RNP. Hay 45,294
@@ -165,15 +171,17 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
     propio archivo.
   - El RUC con prefijo `10` es de persona natural, así que el nombre es el
     de una persona: no mostrarlo fuera del dashboard sin necesidad.
-- **Por verificar:** qué significa el "2024" del archivo (¿proveedores con
-  adjudicaciones en 2024?) y si sirve para contratos de otros años.
+- **Por verificar:** si el año del archivo es el del procedimiento
+  adjudicado, y si sirve para contratos de otros años. El portal lo describe
+  como "proveedores que han adjudicado procedimientos, a nivel de ítem".
 
 ---
 
 ## Consorcios
 
-- **Fuente y URL:** Portal de Datos Abiertos del OECE (CONOSCE), misma URL
-  que Contratos. El enlace exacto de descarga está por verificar.
+- **Fuente y URL:** Portal de Datos Abiertos del OECE (CONOSCE), página
+  "Proveedores y Consorcios", botón "Consorcio". Descarga:
+  <https://conosce.osce.gob.pe/buscador/assets/67ae6c4a/reportes/consorcios/2024/CONOSCE_CONSORCIO2024_0.xlsx>
 - **Archivo y fecha de descarga:** `CONOSCE_CONSORCIO2024_0.xlsx`, 2026-10-26.
   1.2 MB, 5 columnas.
 - **Grano (1 fila = …):** consorcio × miembro. Hay 27,542 filas y 13,408
@@ -215,8 +223,9 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
 
 ## Entidades Contratantes
 
-- **Fuente y URL:** Portal de Datos Abiertos del OECE (CONOSCE), misma URL
-  que Contratos. El enlace exacto de descarga está por verificar.
+- **Fuente y URL:** Portal de Datos Abiertos del OECE (CONOSCE), página
+  "Entidades Contratantes" (listado del SEACE v3.0). Descarga:
+  <https://conosce.osce.gob.pe/buscador/assets/67ae6c4a/reportes/entidadescontratantes/entidades_contratantes.csv>
 - **Archivo y fecha de descarga:** `entidades_contratantes.csv`, 2026-10-26.
   0.4 MB.
   - Separado por `|`. Hay que indicarlo: el detector automático de pandas se
@@ -259,6 +268,69 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
 
 ---
 
+## Revisión del portal (26 de octubre de 2026)
+
+Se revisó en el navegador, **sin descargar nada**, el portal actualizado al
+30 de setiembre de 2026. Las páginas del portal no muestran columnas; solo
+describen cada dataset y enlazan sus archivos.
+
+**Datasets publicados.** Cada uno se elige con el parámetro `pagina=` de
+`…:portal:dataset.html/content`:
+
+| Dataset | `pagina=` | ¿Sirve para alguna contradicción? |
+| --- | --- | --- |
+| Plan Anual de Contrataciones | `pac` | No se sabe: su descripción no menciona nivel de gobierno |
+| **Datos de la Convocatoria** | `convocatorias` | **Candidato para tipo de procedimiento y objeto** |
+| Miembros de Comité | `comite` | No |
+| Procesos con nulidad | `nulos` | No (roadmap R3) |
+| Procesos desiertos | `desiertos` | No (roadmap R3) |
+| **Datos de la Adjudicación** | `adjudicaciones` | Candidato: "datos del proveedor adjudicado, valor adjudicado, cantidad" |
+| Listado de Ofertantes | `postores` | No en v1 |
+| Proveedores y Consorcios | `proveedores` | Ya perfilado |
+| **Contrataciones Directas** | `directa` | **Marca la contratación directa** |
+| Contratos | `contratos` | Ya perfilado |
+| Arbitraje | `arbitraje` | No |
+| Órdenes de Compra y/o Servicios | `ordenes` | Fuera del proyecto |
+| Ampliaciones de Contrato | `ampliaciones` | Roadmap R2 |
+| Cuaderno de incidencias de obras | `cio` | No |
+| Entidades Contratantes | `entidades` | Ya perfilado; un solo CSV |
+
+También hay datos complementarios: SICAN, Pronunciamientos, Opiniones
+Normativas, Conformación Jurídica del RNP y Sanciones.
+
+**Archivos relevantes para 2024.** Todos bajo
+`https://conosce.osce.gob.pe/buscador/assets/67ae6c4a/reportes/`:
+
+| Archivo | Qué contiene, según el portal |
+| --- | --- |
+| `convocatorias/2024/CONOSCE_CONVOCATORIAS2024_0.xlsx` | Convocatorias de "todos los procesos" adjudicados |
+| `convocatorias/2024/CONOSCE_CONVOCATORIAS_CD2024_0.xlsx` | Solo contratación directa |
+| `convocatorias/2024/CONOSCE_CONVOCATORIAS_SIE2024_0.xlsx` | Solo subasta inversa electrónica |
+| `adjudicaciones/2024/CONOSCE_ADJUDICACIONES2024_0.xlsx` | Adjudicaciones de todos los procesos |
+| `adjudicaciones/2024/CONOSCE_ADJUDICACIONES_CD2024_0.xlsx` | "Procesos adjudicados de contratación directa" (página `directa`) |
+
+**Lo que se puede afirmar:**
+- **Partes de Contratos 2024:** el portal enlaza un solo archivo por año,
+  `CONOSCE_CONTRATOS<año>_0.xlsx`, de 2018 a 2026. No hay `_1` ni `_2`
+  publicados. Lo mismo pasa con convocatorias y adjudicaciones.
+- **Tipo de procedimiento y objeto:** que el portal separe archivos "solo
+  contratación directa" (`_CD`) y "solo subasta inversa" (`_SIE`) indica
+  que el tipo de procedimiento existe en los datos de convocatoria y
+  adjudicación. Qué columna lo trae, si también viene el objeto contractual
+  y si se une por `CODIGOCONVOCATORIA` está **por verificar**.
+- **Nivel de gobierno:** ninguna descripción del portal lo menciona
+  (también se buscaron "gobierno", "sector" y "objeto"). La página de
+  Entidades solo dice que el listado cubre a las entidades del artículo 3
+  del TUO de la Ley 30225 y de la Ley 32069. **Sin evidencia de que el
+  portal lo publique.**
+
+**Lo que no se pudo revisar:** el **diccionario de datos**, el único lugar
+donde están las columnas de cada archivo. Está detrás de
+`https://tinyurl.com/conoscediccionarioopendata`, y la vista previa de
+tinyurl pide una verificación anti-bots que la IA no resuelve.
+
+---
+
 ## Decisión de fuente: portal OECE u OCDS
 
 **Propuesta: portal OECE.** Queda **pendiente de confirmar** con el tech lead
@@ -276,11 +348,11 @@ Por qué el portal OECE:
 
 Contradicciones con el plan:
 
-| # | El plan supone | Los datos muestran | Qué afecta |
-| --- | --- | --- | --- |
-| 1 | Hay tipo de procedimiento y objeto contractual | Ninguno de los 4 archivos los trae | `dim_procedimiento`, P2 (contratación directa), la métrica % contratación directa y el filtro por objeto |
-| 2 | La entidad trae nivel de gobierno | Entidades no lo trae | `grupo_pares` (nivel de gobierno × tercil), el percentil vs. pares, la clasificación Alta/Media/Baja y la página 3 |
-| 3 | El archivo de un año = el periodo de análisis | El archivo "2024" mezcla suscripciones de 2023–2025, y enero–marzo de 2024 llegan casi vacíos | Para tener completo un año de suscripción hay que cargar los archivos de años vecinos. La línea de corte 2023–2026 necesita revisarse |
+| # | El plan supone | Los datos muestran | Qué afecta | Posible solución en el portal |
+| --- | --- | --- | --- | --- |
+| 1 | Hay tipo de procedimiento y objeto contractual | Ninguno de los 4 archivos los trae | `dim_procedimiento`, P2 (contratación directa), la métrica % contratación directa y el filtro por objeto | Probable: `CONOSCE_CONVOCATORIAS2024_0.xlsx`. Columnas y clave de unión por verificar |
+| 2 | La entidad trae nivel de gobierno | Entidades no lo trae | `grupo_pares` (nivel de gobierno × tercil), el percentil vs. pares, la clasificación Alta/Media/Baja y la página 3 | No se encontró. Habría que buscar fuera del portal o cambiar el criterio de pares |
+| 3 | El archivo de un año = el periodo de análisis | El archivo "2024" mezcla suscripciones de 2023–2025, y enero–marzo de 2024 llegan casi vacíos | Para tener completo un año de suscripción hay que cargar los archivos de años vecinos. La línea de corte 2023–2026 necesita revisarse | Están todos los años de 2018 a 2026, un archivo por año: alcanza con cargar años vecinos |
 
 Otros hallazgos que cambian el diseño pero no lo bloquean:
 - **Grano con modificaciones.** El plan ya preveía agregar en staging. La
