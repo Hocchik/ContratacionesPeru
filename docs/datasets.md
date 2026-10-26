@@ -18,6 +18,20 @@ del OECE; la fecha es la de modificación del archivo en disco):
 Los tres `.xlsx` tienen una sola hoja (`Sheet1`), encabezado en la fila 1 y
 texto sin caracteres dañados (0 celdas con U+FFFD).
 
+Diccionarios oficiales en `data/raw/oece/diccionario/`. Se usaron para
+confirmar el significado de cada columna:
+
+| Archivo | Dataset que describe |
+| --- | --- |
+| `CONTRATOS DE LAS ENTIDADES - DICCIONARIO - OSCE.xlsx` | Contratos |
+| `DATOS DE ADJUDICACIÓN - DICCIONARIO - OSCE.xlsx` | Datos de la Adjudicación (archivo de datos **no descargado**) |
+| `ENTIDADES CONTRATANTES - DICCIONARIO - OSCE.xlsx` | Entidades Contratantes |
+| `CONSORCIOS ADJUDICADOS - DICCIONARIO - OSCE.xlsx` | Consorcios: las mismas 5 columnas que `CONOSCE_CONSORCIO2024_0.xlsx` |
+| `Consorciosadjudicados.docx` | Consorcios, "versión 1": describe una columna `MONTO` que el archivo actual no tiene |
+
+No hay diccionario de Proveedores (archivo "Individual") ni de Datos de la
+Convocatoria. Tampoco llegó el archivo de datos de convocatorias 2024.
+
 ---
 
 ## Contratos
@@ -65,13 +79,16 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
   | Quién cobra | `RUC_DESTINATARIO_PAGO` | texto (RUC) | 0.0% |
   | Fecha de suscripción | `FECHA_SUSCRIPCION_CONTRATO` | fecha `AAAA-MM-DD` | 0.0% |
   | Fecha de publicación | `FECHA_PUBLICACION_CONTRATO` | fecha `AAAA-MM-DD` | 0.0% |
+  | Contrato resuelto o nulo | `TIENERESOLUCION` | `SI` o vacío | 98.8% (vacío = no) |
   | Modificaciones (roadmap R2) | `MONTO_ADICIONAL`, `MONTO_REDUCCION`, `MONTO_PRORROGA` | numérico | 0.0% |
 
   No se usan:
-  - `CODIGO_CONTRATO`: es igual a `N_COD_CONTRATO`.
+  - `CODIGO_CONTRATO`: en 2024 es igual a `N_COD_CONTRATO`. Según el
+    diccionario, hasta 2020 se armaba uniendo el código de la entidad, el de
+    la convocatoria y el identificador del contrato, así que para cargar
+    años viejos la clave tiene que ser `N_COD_CONTRATO`.
   - `NUM_CONTRATO`.
   - `MONTO_COMPLEMENTARIO`: siempre vale 0.
-  - `TIENERESOLUCION`: `SI` en 174 filas y nulo en el resto.
   - `URLCONTRATO`.
   - `ESPUBLICADO`: siempre vale 1.
   - `FECHA_VIGENCIA_INICIAL`, `FECHA_VIGENCIA_FINAL` y
@@ -90,8 +107,15 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
       15, 17 o 20), y el 99.9% de esos RUC está en el archivo de Proveedores.
     - 2,655 (35.5%) son códigos de consorcio de 6–7 dígitos. Ver Consorcios.
     - 74 (1.0%) son otros identificadores: 70 empiezan con `L0` y no están en
-      Proveedores; 4 empiezan con `99` y en Proveedores figuran como
-      proveedores de España o Guatemala.
+      Proveedores; 4 empiezan con `99`. El diccionario confirma que `99` es
+      el código de un proveedor extranjero sin RUC, y en Proveedores esos 4
+      figuran como de España o Guatemala. El diccionario no menciona ni los
+      códigos de consorcio ni los `L0`.
+  - **Contratos resueltos o nulos:** según el diccionario, `TIENERESOLUCION`
+    indica si el contrato "tiene resolución y/o nulidad". Vale `SI` en 92
+    contratos (1.2%).
+  - **Formato de fechas:** el diccionario dice `aaaa-mm-dd hh:mm:ss`, pero en
+    2024 vienen sin hora. Staging tiene que aceptar los dos formatos.
   - **Fechas de suscripción:** 100% en `AAAA-MM-DD`, de 2023-08-14 a
     2025-12-15.
   - **Duplicados:** 0 filas duplicadas exactas. Las repeticiones de
@@ -125,12 +149,15 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
   - Si un mismo contrato aparece en archivos de años distintos. Hace falta
     otro año para comprobarlo.
   - Qué son los identificadores `L0…`.
-  - Qué mide exactamente `MONTO_ADICIONAL`. En la primera fila de 5,150
-    contratos (69%) vale más de 0, lo que parece demasiado para adicionales
-    en sentido legal.
-  - Si `CODIGOCONVOCATORIA` permite unir con "Datos de la Convocatoria" o
-    "Datos de la Adjudicación", y si esos archivos traen el tipo de
-    procedimiento y el objeto contractual. Ver "Revisión del portal".
+  - Por qué `MONTO_ADICIONAL` vale más de 0 en la primera fila de 5,150
+    contratos (69%). El diccionario lo define como "monto del adicional […]
+    en caso el contrato tuvo un adicional", y esa proporción parece
+    demasiado alta para adicionales en sentido legal. Importa para R2, no
+    para la v1.
+  - Si se deben excluir del HHI los 92 contratos resueltos o nulos. Es una
+    decisión de negocio; ver la sección de decisión.
+  - La unión con "Datos de la Adjudicación" por `CODIGOCONVOCATORIA`. Los
+    diccionarios lo indican, pero falta el archivo de datos. Ver su ficha.
   - Licencia de uso del portal.
 
 ---
@@ -192,8 +219,8 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
 
   | Significado | Nombre real | Tipo esperado | % nulos |
   | --- | --- | --- | --- |
-  | Año | `AÑO` | entero (solo `2024`) | 0.0% |
-  | Código del consorcio | `RUC_CONSORCIO` | texto, 6–7 dígitos (**no es un RUC**) | 0.0% |
+  | Año de la convocatoria | `AÑO` | entero (solo `2024`) | 0.0% |
+  | Código del consorcio en un procedimiento | `RUC_CONSORCIO` | texto, 6–7 dígitos (**no es un RUC**) | 0.0% |
   | Nombre del consorcio | `CONSORCIO` | texto | 0.0% |
   | RUC del miembro | `RUC_MIEMBRO` | texto, 11 caracteres | 0.0% |
   | Nombre del miembro | `MIEMBRO` | texto | 0.0% |
@@ -205,10 +232,30 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
   - El nombre no identifica al consorcio: hay 9,703 nombres para 13,408
     códigos. Por ejemplo, varios consorcios distintos se llaman igual.
   - Duplicados exactos: 0.
+- **Lo que dice el diccionario:**
+  - Es el dataset "Consorcios Adjudicados".
+  - `AÑO` es el año "según la fecha de la convocatoria o fecha de
+    invitación".
+  - `RUC_CONSORCIO` es un código que asigna el SEACE. El diccionario declara
+    11 caracteres, pero los datos traen 6–7.
+  - La versión 1 (`.docx`) agrega que el código "es único por cada
+    procedimiento de selección", así que un mismo consorcio puede aparecer
+    más de una vez, y que se excluyen Obras por Impuestos y los Catálogos
+    Electrónicos.
 - **Limitaciones encontradas:**
-  - **No trae el % de participación de cada miembro.** Con este archivo no
-    se puede repartir el monto de un consorcio entre sus integrantes, y eso
-    confirma la limitación del plan.
+  - **No trae el % de participación de cada miembro**, ni en la versión
+    actual ni en la v1 del diccionario. Con este archivo no se puede
+    repartir el monto de un consorcio entre sus integrantes, y eso confirma
+    la limitación del plan.
+  - **El código cambia en cada procedimiento**, verificado con datos:
+    - Ningún código de los contratos aparece en más de una convocatoria.
+    - En el archivo de consorcios, 1,480 de 11,020 grupos de miembros
+      (mismos RUC) tienen más de un código; uno llega a 26.
+    - Dentro de una misma entidad, en 2024: 55 pares (entidad, mismo grupo)
+      con más de un código, que suman 121 contratos.
+    - Si el proveedor es el código, un consorcio que gana varias veces en la
+      misma entidad cuenta como varios proveedores distintos, y la
+      concentración baja de forma artificial.
   - **Los consorcios pesan mucho:** son el 35.8% de los contratos en soles,
     pero el **70.2% del monto**.
   - En los contratos de consorcio, `RUC_DESTINATARIO_PAGO` nunca es el código
@@ -217,7 +264,11 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
 - **Por verificar:**
   - Si el RUC de pago que no es de un miembro es el RUC propio del
     consorcio. Los consorcios con contabilidad independiente tienen RUC.
-  - Si el archivo de otro año trae los mismos códigos.
+  - El usuario mencionó un dataset nuevo de "Consorcios Adjudicados" en
+    `data/raw/oece/consorcios/2024/`, pero esa carpeta no existe. Por el
+    diccionario y por la ruta del portal (`reportes/consorcios/2024/`), es
+    el mismo `CONOSCE_CONSORCIO2024_0.xlsx` que ya está en
+    `proveedores/2024/`.
 
 ---
 
@@ -257,14 +308,69 @@ texto sin caracteres dañados (0 celdas con U+FFFD).
   - `ESTADO`: `Activo` 3,259 e `Inactivo` 107.
   - RUC válido: 100%.
   - Duplicados exactos: 0.
+- **Lo que dice el diccionario:** tiene 8 columnas y ninguna es nivel de
+  gobierno, sector ni tipo de entidad. `ULTIMAACTUALIZACION` está en el
+  archivo pero no en el diccionario. El diccionario dice que "todas están
+  Activas", pero el archivo trae 107 `Inactivo`.
 - **Limitaciones encontradas:**
-  - **No trae nivel de gobierno, sector ni tipo de entidad.**
+  - **No trae nivel de gobierno, sector ni tipo de entidad.** Lo confirman
+    el archivo y el diccionario.
+  - El nombre de la entidad no alcanza para inferirlo (es evidencia, no una
+    regla):
+    - Empiezan con `MUNICIPALIDAD` 1,896 entidades, contienen `GOBIERNO
+      REGIONAL` 577 y empiezan con `MINISTERIO` 34.
+    - Esos 3 patrones cubren el 60.4% de los contratos de 2024.
+    - Quedan 859 entidades sin patrón: organismos, universidades,
+      beneficencias, unidades de la PNP, empresas del Estado, etc.
   - La región se puede tomar de `DEPARTAMENTO`: 25 valores distintos.
 - **Por verificar:**
-  - Si `CODIGO_SIAF` permite traer el nivel de gobierno de otra fuente,
-    como la clasificación presupuestal del MEF.
+  - Si `CODIGO_SIAF` (presente en el 89.6% de las entidades) permite traer
+    el nivel de gobierno de otra fuente, como la clasificación
+    presupuestal del MEF.
   - Si el padrón incluye entidades que ya no existen pero tienen contratos
     en años anteriores.
+
+---
+
+## Datos de la Adjudicación (solo diccionario)
+
+El archivo de datos **no está descargado**. Esta ficha sale únicamente de
+`DATOS DE ADJUDICACIÓN - DICCIONARIO - OSCE.xlsx`, así que nada de lo que
+sigue está comprobado con datos.
+
+- **Fuente y URL:** Portal de Datos Abiertos del OECE, página "Datos de la
+  Adjudicación". Descarga:
+  `https://conosce.osce.gob.pe/buscador/assets/67ae6c4a/reportes/adjudicaciones/2024/CONOSCE_ADJUDICACIONES2024_0.xlsx`.
+- **Grano según el diccionario:** ítem adjudicado de un procedimiento. Puede
+  haber más de un proveedor por ítem cuando "la adjudicación haya sido a
+  prorrata". Por verificar con datos.
+- **Columnas que importan para el plan:**
+
+  | Significado | Nombre real (diccionario) | Uso |
+  | --- | --- | --- |
+  | Código de la convocatoria | `CODIGOCONVOCATORIA` | **Unión con Contratos** |
+  | Ítem | `N_ITEM` | Unión con `NUM_ITEM` de Contratos |
+  | Proveedor | `RUC_PROVEEDOR` | Unión con `RUC_CONTRATISTA` |
+  | **Tipo de procedimiento** | `TIPOPROCESOSELECCION` | `dim_procedimiento`, contratación directa (P2) |
+  | Tipo de proveedor | `TIPO_PROVEEDOR` | Marca oficial de consorcio: Persona Natural, Persona Jurídica, Persona No domiciliada o Consorcio |
+  | Fecha de la convocatoria | `FECHA_CONVOCATORIA` | Explica el año de los archivos |
+  | Estado del ítem | `ESTADO_ITEM` | Adjudicado, Consentido o Contratado |
+
+  Otras columnas: `CODIGOENTIDAD`, `ENTIDAD_RUC`, `PROCESO` (nomenclatura),
+  `DESCRIPCION_ITEM`, `CANTIDAD_ADJUDICADO_ITEM`, `MONTO_REFERENCIAL_ITEM`,
+  `MONTO_ADJUDICADO_ITEM`, `MONEDA`, `UNIDAD_MEDIDA`, `PROVEEDOR`,
+  `FECHA_BUENAPRO` y `FECHA_CONSENTIMIENTO_BP`.
+- **Limitaciones según el diccionario:**
+  - **No trae objeto contractual** (bien, servicio, obra o consultoría).
+  - El portal avisa que no incluye procedimientos con datos de adjudicación
+    incompletos.
+- **Por verificar:**
+  - Qué valores trae `TIPOPROCESOSELECCION` y cuál corresponde a
+    contratación directa.
+  - Si el tipo es constante por `CODIGOCONVOCATORIA`.
+  - Qué % de los contratos encuentra su convocatoria.
+  - Si el archivo `_CD` (contratación directa) está incluido en el de
+    "todos los procesos" o va aparte.
 
 ---
 
@@ -324,37 +430,51 @@ Normativas, Conformación Jurídica del RNP y Sanciones.
   del TUO de la Ley 30225 y de la Ley 32069. **Sin evidencia de que el
   portal lo publique.**
 
-**Lo que no se pudo revisar:** el **diccionario de datos**, el único lugar
-donde están las columnas de cada archivo. Está detrás de
-`https://tinyurl.com/conoscediccionarioopendata`, y la vista previa de
-tinyurl pide una verificación anti-bots que la IA no resuelve.
+**Diccionario de datos:** está detrás de
+`https://tinyurl.com/conoscediccionarioopendata`, con una verificación
+anti-bots. Lo descargó el usuario después; ver la tabla al inicio de este
+documento.
 
 ---
 
-## Decisión de fuente: portal OECE u OCDS
+## Decisión de fuente: portal OECE
 
-**Propuesta: portal OECE.** Queda **pendiente de confirmar** con el tech lead
-porque los datos contradicen el plan en tres puntos.
+**Decisión: portal OECE**, con "Datos de la Adjudicación" como quinto
+dataset para el tipo de procedimiento. OCDS queda descartado para la v1: era
+el plan B por si el portal no servía, y el portal sirve.
 
-Por qué el portal OECE:
+Por qué:
 - Las piezas centrales están y se unen bien entre sí:
   - Contratos con Entidades: 100%.
   - Contratos con Consorcios: 100% de los códigos.
   - Contratos con Proveedores: 99.9% de los RUC válidos.
 - La clave del contrato es estable y el monto total cuadra con la suma de
   sus ítems en el 99.99% de los casos.
+- El tipo de procedimiento existe en el mismo portal
+  (`TIPOPROCESOSELECCION`, en Adjudicación) y comparte
+  `CODIGOCONVOCATORIA` con Contratos. Esto sale de los diccionarios; la
+  unión con datos se verifica al bajar Adjudicación (CP-2).
 - Trae los montos de las modificaciones, que el plan esperaba de un segundo
   dataset (roadmap R2).
 
-Contradicciones con el plan:
+**Estado de las contradicciones con el plan:**
 
-| # | El plan supone | Los datos muestran | Qué afecta | Posible solución en el portal |
+| # | El plan supone | Lo que se encontró | Estado | Qué queda |
 | --- | --- | --- | --- | --- |
-| 1 | Hay tipo de procedimiento y objeto contractual | Ninguno de los 4 archivos los trae | `dim_procedimiento`, P2 (contratación directa), la métrica % contratación directa y el filtro por objeto | Probable: `CONOSCE_CONVOCATORIAS2024_0.xlsx`. Columnas y clave de unión por verificar |
-| 2 | La entidad trae nivel de gobierno | Entidades no lo trae | `grupo_pares` (nivel de gobierno × tercil), el percentil vs. pares, la clasificación Alta/Media/Baja y la página 3 | No se encontró. Habría que buscar fuera del portal o cambiar el criterio de pares |
-| 3 | El archivo de un año = el periodo de análisis | El archivo "2024" mezcla suscripciones de 2023–2025, y enero–marzo de 2024 llegan casi vacíos | Para tener completo un año de suscripción hay que cargar los archivos de años vecinos. La línea de corte 2023–2026 necesita revisarse | Están todos los años de 2018 a 2026, un archivo por año: alcanza con cargar años vecinos |
+| 1 | Hay tipo de procedimiento y objeto contractual | Contratos no los trae. **El tipo de procedimiento sí está** en Adjudicación (`TIPOPROCESOSELECCION`), unible por `CODIGOCONVOCATORIA`. **El objeto contractual no aparece** en ningún diccionario recibido | Parcial | Bajar `CONOSCE_ADJUDICACIONES2024_0.xlsx` y medir la unión. Para el objeto: revisar Convocatorias (no llegaron ni el archivo ni su diccionario) o sacar ese filtro de la v1 |
+| 2 | La entidad trae nivel de gobierno | No está en Entidades (archivo y diccionario) y el portal no lo menciona. Por el nombre se clasifica el 60.4% de los contratos | Confirmada | Decide el tech lead: fuente externa por `CODIGO_SIAF`, regla por nombre con un grupo "otros", o pares solo por tercil de monto |
+| 3 | El archivo de un año = el periodo de análisis | El año del archivo es el de la **convocatoria**: lo dice el diccionario de Consorcios para `AÑO`, y en Contratos lo apoyan la distribución de fechas y el portal. Una convocatoria de 2024 se firma en 2024 (83.6%) o en 2025 (16.4%) | Explicada | Para cerrar un año de suscripción Y hay que cargar los archivos Y y Y−1. Eso afecta la línea de corte |
 
-Otros hallazgos que cambian el diseño pero no lo bloquean:
+**Hallazgos nuevos de los diccionarios:**
+- **El código de consorcio es uno por procedimiento.** El mismo grupo de
+  empresas aparece con códigos distintos (1,480 grupos; hasta 26 códigos).
+  Si `proveedor_key` es el código, la concentración se subestima todavía
+  más de lo que el plan asumía. Alternativa: identificar al consorcio por
+  el conjunto de RUC de sus miembros. Decide el tech lead.
+- **Hay contratos resueltos o nulos** (`TIENERESOLUCION = SI`, 92 contratos,
+  1.2%). El plan no dice si cuentan para el HHI.
+
+**Otros hallazgos que cambian el diseño pero no lo bloquean:**
 - **Grano con modificaciones.** El plan ya preveía agregar en staging. La
   regla es tomar `MONTO_CONTRATADO_TOTAL` una vez por contrato.
 - **Los códigos de consorcio no son RUC.** El test "RUC válido" daría 36.5%
