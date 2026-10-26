@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": [
+    "dbt",
+    "postgres"
+  ]
+}

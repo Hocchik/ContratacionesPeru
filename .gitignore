@@ -1,0 +1,13 @@
+# Datos crudos y procesados: nunca van al repo
+data/
+
+# Credenciales y entorno local
+.env
+.venv/
+
+# Artefactos de dbt
+target/
+logs/
+
+# Python
+__pycache__/

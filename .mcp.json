@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "dbt": {
+      "command": "uvx",
+      "args": ["dbt-mcp"],
+      "env": {
+        "DBT_PROJECT_DIR": "${DBT_PROJECT_DIR}",
+        "DBT_PATH": "${DBT_PATH}"
+      }
+    },
+    "postgres": {
+      "command": "uvx",
+      "args": ["postgres-mcp", "--access-mode=restricted"],
+      "env": {
+        "DATABASE_URI": "${CONTRATACIONES_DB_URI_LECTURA}"
+      }
+    }
+  }
+}
