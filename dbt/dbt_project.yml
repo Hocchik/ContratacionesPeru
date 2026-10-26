@@ -1,0 +1,24 @@
+# Proyecto dbt de Contrataciones Perú. Los modelos llegan en CP-4 (staging) y
+# CP-5 (intermediate y marts).
+name: contrataciones_peru
+version: "1.0.0"
+profile: contrataciones_peru  # definido en dbt/profiles.yml
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+clean-targets: ["target", "dbt_packages"]
+
+# Materialización por capa (docs/plan.md, sección f): staging en vistas y
+# marts en tablas. Intermediate no está definido en el plan; queda en vista,
+# que es el default de dbt, hasta que CP-5 diga otra cosa.
+models:
+  contrataciones_peru:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table

@@ -1,0 +1,17 @@
+# Conexión de dbt a PostgreSQL. No guarda secretos: todo sale de variables de
+# entorno. Solo CONTRATACIONES_DB_PASSWORD es obligatoria; el resto tiene un
+# valor por defecto para Postgres local (ver README).
+#
+# dbt encuentra este archivo porque se corre desde la carpeta dbt/.
+contrataciones_peru:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('CONTRATACIONES_DB_HOST', 'localhost') }}"
+      port: "{{ env_var('CONTRATACIONES_DB_PORT', '5432') | as_number }}"
+      dbname: "{{ env_var('CONTRATACIONES_DB_NAME', 'contrataciones') }}"
+      user: "{{ env_var('CONTRATACIONES_DB_USER', 'contrataciones_etl') }}"
+      password: "{{ env_var('CONTRATACIONES_DB_PASSWORD') }}"
+      schema: public  # esquema por defecto; los esquemas por capa se definen en CP-4
+      threads: 4
