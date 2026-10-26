@@ -26,7 +26,7 @@ PISTAS_FECHA = ("fecha", "date")
 PISTAS_MONTO = ("monto", "amount", "valor", "importe")
 
 
-def leer(ruta: Path, hoja: str | None, max_filas: int | None) -> tuple[pd.DataFrame, str]:
+def leer(ruta: Path, hoja: str | None, max_filas: int | None, sep: str | None = None) -> tuple[pd.DataFrame, str]:
     sufijo = ruta.suffix.lower()
     if sufijo in (".xlsx", ".xls"):
         df = pd.read_excel(ruta, sheet_name=hoja or 0, dtype=str, nrows=max_filas)
@@ -37,7 +37,8 @@ def leer(ruta: Path, hoja: str | None, max_filas: int | None) -> tuple[pd.DataFr
     ultimo_error = None
     for enc in ENCODINGS:
         try:
-            df = pd.read_csv(ruta, dtype=str, encoding=enc, sep=None, engine="python", nrows=max_filas)
+            # Sin --sep, pandas adivina el separador; con nombres que traen comas se equivoca.
+            df = pd.read_csv(ruta, dtype=str, encoding=enc, sep=sep, engine="python", nrows=max_filas)
             return df, enc
         except (UnicodeDecodeError, pd.errors.ParserError) as exc:
             ultimo_error = exc
@@ -49,8 +50,15 @@ def tiene_pista(columna: str, pistas: tuple[str, ...]) -> bool:
     return any(p in nombre for p in pistas)
 
 
-def perfilar(ruta: Path, hoja: str | None, max_filas: int | None) -> str:
-    df, encoding = leer(ruta, hoja, max_filas)
+def leer_fechas(serie: pd.Series) -> tuple[pd.Series, pd.Series]:
+    """Lee fechas solo con formatos explícitos: con dayfirst=True, pandas lee 2025-03-06 como 3 de junio."""
+    iso = pd.to_datetime(serie, errors="coerce", format="%Y-%m-%d")
+    dia_primero = pd.to_datetime(serie, errors="coerce", format="%d/%m/%Y")
+    return iso, dia_primero
+
+
+def perfilar(ruta: Path, hoja: str | None, max_filas: int | None, sep: str | None = None) -> str:
+    df, encoding = leer(ruta, hoja, max_filas, sep)
     n = len(df)
     lineas = [
         f"## Perfil: `{ruta.name}`",
@@ -88,10 +96,14 @@ def perfilar(ruta: Path, hoja: str | None, max_filas: int | None) -> str:
             dist = ", ".join(f"{k}: {v:,}" for k, v in top.items())
             lineas.append(f"- Moneda `{col}`: {dist}")
         if tiene_pista(col, PISTAS_FECHA):
-            fechas = pd.to_datetime(serie, errors="coerce", dayfirst=True)
-            ok = fechas.notna().mean() * 100 if n else 0
+            iso, dia_primero = leer_fechas(serie)
+            fechas = iso.fillna(dia_primero)
+            ok_iso, ok_dia, ok = (s.notna().mean() * 100 if n else 0 for s in (iso, dia_primero, fechas))
             rango = f"{fechas.min():%Y-%m-%d} a {fechas.max():%Y-%m-%d}" if fechas.notna().any() else "sin fechas legibles"
-            lineas.append(f"- Fecha `{col}`: {ok:.1f}% legible (día primero) · rango {rango}")
+            lineas.append(
+                f"- Fecha `{col}`: {ok_iso:.1f}% AAAA-MM-DD · {ok_dia:.1f}% DD/MM/AAAA · "
+                f"{100 - ok:.1f}% en otro formato o ilegible · rango {rango}"
+            )
         if tiene_pista(col, PISTAS_MONTO):
             numeros = pd.to_numeric(serie.str.replace(",", "", regex=False), errors="coerce")
             ok = numeros.notna().mean() * 100 if n else 0
@@ -110,12 +122,13 @@ def main() -> None:
     parser.add_argument("ruta", type=Path)
     parser.add_argument("--hoja", default=None)
     parser.add_argument("--max-filas", type=int, default=None)
+    parser.add_argument("--sep", default=None, help="separador del CSV (por ejemplo '|'); si se omite, se adivina")
     args = parser.parse_args()
     if not args.ruta.exists():
         sys.exit(f"No existe: {args.ruta}")
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    print(perfilar(args.ruta, args.hoja, args.max_filas))
+    print(perfilar(args.ruta, args.hoja, args.max_filas, args.sep))
 
 
 if __name__ == "__main__":
