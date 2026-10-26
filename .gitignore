@@ -4,6 +4,7 @@ data/
 # Credenciales y entorno local
 .env
 .venv/
+.claude/settings.local.json
 
 # Artefactos de dbt
 target/
