@@ -9,6 +9,7 @@ data/
 # Artefactos de dbt
 target/
 logs/
+dbt_packages/
 
 # Python
 __pycache__/
