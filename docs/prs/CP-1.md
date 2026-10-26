@@ -89,10 +89,13 @@ dbt debug
 - [x] El proyecto dbt se carga — `dbt parse --project-dir dbt --profiles-dir
   dbt` → exit 0. Avisa de 3 rutas de configuración sin modelos, lo que es
   esperable hasta CP-4.
-- [ ] **La base existe y dbt se conecta (`dbt debug` → `All checks passed!`)**
-  — Falta que el usuario corra `crear_base.sql`, guarde la clave y ejecute
-  `dbt debug`. La IA no puede: el hook `guardian-secretos` bloquea cualquier
-  comando que toque variables con claves, y la IA no ingresa contraseñas.
+- [x] **La base existe y dbt se conecta** — El usuario corrió
+  `crear_base.sql`, guardó la clave y ejecutó `dbt debug` en su terminal →
+  `All checks passed!` (reportado por el usuario; la IA no lo pudo correr
+  porque el hook `guardian-secretos` bloquea los comandos que tocan claves).
+  Que el script se completó se deduce de que la clave de `contrataciones_etl`
+  funciona: `\password` va al final y `ON_ERROR_STOP` corta ante cualquier
+  error previo.
 
 ## Hecho por la IA vs. por el usuario
 - IA: `.gitattributes`, `.gitignore` (`dbt_packages/`, `.user.yml`),
@@ -101,14 +104,12 @@ dbt debug
 - Usuario: tres decisiones de diseño (rol de la base, mecanismo de
   credenciales y alcance de dbt en CP-1). Ejecutar `crear_base.sql` y
   `dbt debug`.
-- El usuario debe verificar:
-  1. Que `crear_base.sql` corra completo. No lo pude probar sin la clave de
-     `postgres`. En particular, que `\password` pida las claves aunque el
-     script corra con `-f`, y que `\connect contrataciones` no falle.
-  2. `dbt debug` → `All checks passed!`.
-  3. La codificación: `psql -U postgres -c "\l contrataciones"` debe mostrar
+- Verificado por el usuario: `crear_base.sql` corrió y `dbt debug` →
+  `All checks passed!`.
+- El usuario debe verificar (opcional, no bloquea el PR):
+  1. La codificación: `psql -U postgres -c "\l contrataciones"` debe mostrar
      `UTF8`.
-  4. Los privilegios por defecto: `psql -U postgres -d contrataciones -c
+  2. Los privilegios por defecto: `psql -U postgres -d contrataciones -c
      "\ddp"` debe mostrar 2 filas para `contrataciones_etl` → `claude_lectura`
      (schema `U`, table `r`).
 
