@@ -100,6 +100,10 @@ dbt debug
 
 Tiene que terminar con `All checks passed!`.
 
+Si PowerShell dice que no reconoce `dbt`, el entorno no está activado: dbt solo
+está instalado dentro de `.venv`, y con el entorno activo el prompt empieza con
+`(.venv)`. Desde `dbt/`, actívalo con `..\.venv\Scripts\Activate.ps1`.
+
 ## Claude Code
 
 El repo incluye la configuración con la que se trabaja con Claude Code:
