@@ -119,11 +119,12 @@ dbt debug
 - **Esquemas por capa (CP-4):** si se usa `+schema: staging` sin
   sobrescribir `generate_schema_name`, dbt crea `public_staging` y no
   `staging`, como pide el plan.
-- **No hay remoto en GitHub:** la definición de "listo" pide un PR hacia
-  `main`. Hasta que exista el remoto, el merge tendría que ser local.
-- **`INSTALAR.md` sigue sin versionar:** el README ya cubre la puesta en
-  marcha, y `crear_base.sql` reemplaza su Paso 4. Falta decidir si se mueve
-  a `docs/` o se borra.
+- **Remoto en GitHub:** <https://github.com/Hocchik/ContratacionesPeru>.
+  Las ramas están subidas, pero el PR hacia `main` todavía no está abierto.
+- **`INSTALAR.md` se movió a `docs/kit-claude-code.md`** y no se borró.
+  Tiene información que no está en otro lado: el comando del MCP de Power BI
+  (CP-6) y el origen y la licencia de las skills de dbt. Una nota al inicio
+  aclara qué pasos reemplazan el README y `crear_base.sql`.
 - **MCP de dbt:** por verificar si `dbt-mcp` encuentra `dbt/profiles.yml`
   cuando se definan `DBT_PROJECT_DIR` y `DBT_PATH`.
 - **Valores por defecto duplicados:** la ingesta (CP-2) va a leer las mismas

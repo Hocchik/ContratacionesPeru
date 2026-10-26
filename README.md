@@ -108,7 +108,10 @@ está instalado dentro de `.venv`, y con el entorno activo el prompt empieza con
 
 El repo incluye la configuración con la que se trabaja con Claude Code:
 `CLAUDE.md`, las skills de `.claude/skills/` y los MCP de `.mcp.json` (dbt y
-Postgres en solo lectura). Los MCP leen estas variables de entorno:
+Postgres en solo lectura). El detalle del kit (plugins, origen de las skills
+y el MCP de Power BI) está en
+[docs/kit-claude-code.md](docs/kit-claude-code.md). Los MCP leen estas
+variables de entorno:
 
 | Variable | Qué es |
 | --- | --- |
